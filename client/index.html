@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>TypoBlend</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="bo-panel" id="boPanel">
+
+  <!-- ===================== TOOLBAR ===================== -->
+  <div class="bo-toolbar">
+    <button id="btnSync" class="bo-btn-icon" title="Sync — read fx from selected layer">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 10a7 7 0 0 1 12-5.2M17 10a7 7 0 0 1-12 5.2"/>
+        <path d="M15 2v3h-3M5 18v-3h3"/>
+      </svg>
+    </button>
+    <button id="btnApply" class="bo-btn-icon" title="Apply — apply to selected layer(s)">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 10.5l4 4 8-9"/>
+      </svg>
+    </button>
+    <button id="btnClear" class="bo-btn-icon" title="Clear — remove all fx from selected layer">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 6h12"/>
+        <path d="M8 6V4.5A1.5 1.5 0 0 1 9.5 3h1A1.5 1.5 0 0 1 12 4.5V6"/>
+        <path d="M5.5 6l.6 10a1.5 1.5 0 0 0 1.5 1.4h4.8a1.5 1.5 0 0 0 1.5-1.4l.6-10"/>
+        <path d="M8.5 9v5M11.5 9v5"/>
+      </svg>
+    </button>
+    <div id="boSpinner" class="bo-spinner" style="display:none;"></div>
+    <button id="btnCollapseAll" class="bo-icon-btn" title="Collapse / Expand all">⬍</button>
+  </div>
+  <div class="bo-toolbar bo-toolbar-2">
+    <button id="btnCopyStyle" class="bo-btn-icon" title="Copy Style">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="7" y="7" width="9" height="9" rx="1.5"/>
+        <path d="M13 7V4.5A1.5 1.5 0 0 0 11.5 3h-7A1.5 1.5 0 0 0 3 4.5v7A1.5 1.5 0 0 0 4.5 13H7"/>
+      </svg>
+    </button>
+    <button id="btnPasteStyle" class="bo-btn-icon" disabled title="Paste Style">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="4.5" y="4" width="11" height="14" rx="1.5"/>
+        <path d="M7.5 3.6h5v1.3a.6.6 0 0 1-.6.6h-3.8a.6.6 0 0 1-.6-.6V3.6z" fill="currentColor" stroke="none"/>
+        <path d="M7 9.5h6M7 12.5h6M7 15.5h4"/>
+      </svg>
+    </button>
+  </div>
+  <div class="bo-toolbar bo-toolbar-2">
+    <label class="bo-autosync"><input type="checkbox" id="chkAutoSync"> Auto-Sync</label>
+    <label class="bo-autosync"><input type="checkbox" id="chkAutoApply"> Auto-Apply</label>
+  </div>
+  <div class="bo-layername" id="boLayerName">No layer selected</div>
+
+  <div class="bo-scroll" id="boScroll">
+
+    <!-- ===================== BLENDING OPTIONS (gốc) ===================== -->
+    <div class="bo-section" data-fx="blending">
+      <div class="bo-section-header bo-header-plain">
+        <span class="bo-title">Blending Options</span>
+      </div>
+      <div class="bo-section-body bo-open">
+        <div class="bo-row">
+          <span class="bo-label">Blend Mode</span>
+          <select id="blendMode" class="bo-select"></select>
+        </div>
+        <div class="bo-row">
+          <span class="bo-label">Opacity</span>
+          <input type="range" id="layerOpacity" min="0" max="100" value="100">
+          <input type="number" class="bo-val" id="layerOpacityVal" min="0" max="100" value="100">
+        </div>
+        <div class="bo-row">
+          <span class="bo-label">Fill</span>
+          <input type="range" id="layerFillOpacity" min="0" max="100" value="100">
+          <input type="number" class="bo-val" id="layerFillOpacityVal" min="0" max="100" value="100">
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== BEVEL & EMBOSS ===================== -->
+    <div class="bo-section" data-fx="bevelEmboss">
+      <div class="bo-section-header">
+        <span class="bo-fx-label"><input type="checkbox" class="bo-enable" data-fx="bevelEmboss"><span class="bo-fx-name">Bevel &amp; Emboss</span></span>
+        <span class="bo-collapse-arrow">▾</span>
+      </div>
+      <div class="bo-section-body">
+        <div class="bo-row">
+          <span class="bo-label">Style</span>
+          <select id="bevelStyle" class="bo-select">
+            <option value="innerBevel">Inner Bevel</option>
+            <option value="outerBevel">Outer Bevel</option>
+            <option value="emboss">Emboss</option>
+            <option value="pillowEmboss">Pillow Emboss</option>
+            <option value="strokeEmboss">Stroke Emboss</option>
+          </select>
+        </div>
+        <div class="bo-row">
+          <span class="bo-label">Technique</span>
+          <select id="bevelTechnique" class="bo-select">
+            <option value="smoothTechnique">Smooth</option>
+            <option value="chiselHardTechnique">Chisel Hard</option>
+            <option value="chiselSoftTechnique">Chisel Soft</option>
+          </select>
+        </div>
+        <div class="bo-row">
+          <span class="bo-label">Depth</span>
+          <input type="range" id="bevelDepth" min="0" max="1000" value="100">
+          <input type="number" class="bo-val" id="bevelDepthVal" min="0" max="1000" value="100">
+        </div>
+        <div class="bo-row">
+          <span class="bo-label">Direction</span>
+          <select id="bevelDirection" class="bo-select">
+            <option value="in">Up</option>
+            <option value="out">Down</option>
+          </select>
+        </div>
+        <div class="bo-row">
+          <span class="bo-label">Size</span>
+          <input type="range" id="bevelSize" min="0" max="250" value="5">
+          <input type="number" class="bo-val" id="bevelSizeVal" min="0" max="1000" value="5">
+        </div>
+        <div class="bo-row">
+          <span class="bo-label">Soften</span>
+          <input type="range" id="bevelSoften" min="0" max="16" value="0">
+          <input type="number" class="bo-val" id="bevelSoftenVal" min="0" max="16" value="0">
+        </div>
+        <div class="bo-angle-row">
+          <canvas id="bevelAngleCanvas" width="20" height="20"></canvas>
+          <span class="bo-angle-label">Angle</span>
+          <input type="number" id="bevelAngleInput" min="-180" max="180" value="120">
+          <label class="bo-inline-check"><input type="checkbox" id="bevelUseGlobalLight" checked> Global</label>
+        </div>
+        <div class="bo-row">
+          <span class="bo-label">Altitude</span>
+          <input type="range" id="bevelAltitude" min="0" max="90" value="30">
+          <input type="number" class="bo-val" id="bevelAltitudeVal" min="0" max="90" value="30">
+        </div>
+        <label class="bo-inline-check bo-block-check"><input type="checkbox" id="bevelAntiAlias"> Anti-aliased</label>
+
+        <div class="bo-subtitle">Highlight</div>
+        <div class="bo-row">
+          <span class="bo-label">Mode</span>
+          <select id="bevelHighlightMode" class="bo-select bo-select-blend"></select>
+          <div class="color-swatch" id="bevelHighlightColor" title="Highlight Color"></div>
+        </div>
+        <div class="bo-row">
+          <span class="bo-label">Opacity</span>
+          <input type="range" id="bevelHighlightOpacity" min="0" max="100" value="75">
+          <input type="number" class="bo-val" id="bevelHighlightOpacityVal" min="0" max="100" value="75">
+        </div>
+
+        <div class="bo-subtitle">Shadow</div>
+        <div class="bo-row">
+          <span class="bo-label">Mode</span>
+          <select id="bevelShadowMode" class="bo-select bo-select-blend"></select>
+          <div class="color-swatch" id="bevelShadowColor" title="Shadow Color"></div>
+        </div>
+        <div class="bo-row">
+          <span class="bo-label">Opacity</span>
+          <input type="range" id="bevelShadowOpacity" min="0" max="100" value="75">
+          <input type="number" class="bo-val" id="bevelShadowOpacityVal" min="0" max="100" value="75">
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== COLOR OVERLAY ===================== -->
+    <div class="bo-section" data-fx="colorOverlay">
+      <div class="bo-section-header">
+        <span class="bo-fx-label"><input type="checkbox" class="bo-enable" data-fx="colorOverlay"><span class="bo-fx-name">Color Overlay</span></span>
+        <div class="color-swatch" id="colorOverlaySwatch" title="Overlay Color"></div>
+        <span class="bo-collapse-arrow">▾</span>
+      </div>
+      <div class="bo-section-body">
+        <div class="bo-row">
+          <span class="bo-label">Blend</span>
+          <select id="colorOverlayBlendMode" class="bo-select bo-select-blend"></select>
+        </div>
+        <div class="bo-row">
+          <span class="bo-label">Opacity</span>
+          <input type="range" id="colorOverlayOpacity" min="0" max="100" value="100">
+          <input type="number" class="bo-val" id="colorOverlayOpacityVal" min="0" max="100" value="100">
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== STROKE ===================== -->
+    <div class="bo-section" data-fx="stroke">
+      <div class="bo-section-header">
+        <span class="bo-fx-label"><input type="checkbox" class="bo-enable" data-fx="stroke"><span class="bo-fx-name">Stroke</span></span>
+        <div class="color-swatch" id="strokeColor" title="Stroke Color"></div>
+        <span class="bo-collapse-arrow">▾</span>
+      </div>
+      <div class="bo-section-body">
+        <div class="bo-row">
+          <span class="bo-label">Size</span>
+          <input type="range" id="strokeSize" min="0" max="60" value="3">
+          <input type="number" class="bo-val" id="strokeSizeVal" min="0" max="500" value="3">
+        </div>
+        <div class="bo-row">
+          <span class="bo-label">Position</span>
+          <select id="strokePosition" class="bo-select">
+            <option value="outsetFrame">Outside</option>
+            <option value="insetFrame">Inside</option>
+            <option value="centerFrame">Center</option>
+          </select>
+        </div>
+        <div class="bo-row">
+          <span class="bo-label">Blend</span>
+          <select id="strokeBlendMode" class="bo-select bo-select-blend"></select>
+        </div>
+        <div class="bo-row">
+          <span class="bo-label">Opacity</span>
+          <input type="range" id="strokeOpacity" min="0" max="100" value="100">
+          <input type="number" class="bo-val" id="strokeOpacityVal" min="0" max="100" value="100">
+        </div>
+        <div class="bo-row">
+          <span class="bo-label">Fill Type</span>
+          <select id="strokePaintType" class="bo-select">
+            <option value="solid">Color</option>
+            <option value="gradient">Gradient</option>
+          </select>
+        </div>
+        <div id="strokeGradientBlock" style="display:none;">
+          <div class="bo-gradient-editor" id="strokeGradientEditor"></div>
+          <div class="bo-row">
+            <span class="bo-label">Style</span>
+            <select id="strokeGradientStyle" class="bo-select">
+              <option value="linear">Linear</option>
+              <option value="radial">Radial</option>
+              <option value="angle">Angle</option>
+              <option value="reflected">Reflected</option>
+              <option value="diamond">Diamond</option>
+            </select>
+          </div>
+          <div class="bo-angle-row">
+            <canvas id="strokeGradAngleCanvas" width="20" height="20"></canvas>
+            <span class="bo-angle-label">Angle</span>
+            <input type="number" id="strokeGradAngleInput" min="-180" max="180" value="0">
+          </div>
+          <div class="bo-row">
+            <span class="bo-label">Scale</span>
+            <input type="range" id="strokeGradScale" min="10" max="150" value="100">
+            <input type="number" class="bo-val" id="strokeGradScaleVal" min="1" max="1000" value="100">
+          </div>
+          <label class="bo-inline-check bo-block-check"><input type="checkbox" id="strokeGradReverse"> Reverse</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== INNER SHADOW ===================== -->
+    <div class="bo-section" data-fx="innerShadow">
+      <div class="bo-section-header">
+        <span class="bo-fx-label"><input type="checkbox" class="bo-enable" data-fx="innerShadow"><span class="bo-fx-name">Inner Shadow</span></span>
+        <div class="color-swatch" id="innerShadowColor" title="Inner Shadow Color"></div>
+        <span class="bo-collapse-arrow">▾</span>
+      </div>
+      <div class="bo-section-body">
+        <div class="bo-row">
+          <span class="bo-label">Blend</span>
+          <select id="innerShadowBlendMode" class="bo-select bo-select-blend"></select>
+        </div>
+        <div class="bo-row">
+          <span class="bo-label">Opacity</span>
+          <input type="range" id="innerShadowOpacity" min="0" max="100" value="75">
+          <input type="number" class="bo-val" id="innerShadowOpacityVal" min="0" max="100" value="75">
+        </div>
+        <div class="bo-angle-row">
+          <canvas id="innerShadowAngleCanvas" width="20" height="20"></canvas>
+          <span class="bo-angle-label">Angle</span>
+          <input type="number" id="innerShadowAngleInput" min="-180" max="180" value="120">
+          <label class="bo-inline-check"><input type="checkbox" id="innerShadowUseGlobalLight" checked> Global</label>
+        </div>
+        <div class="bo-row">
+          <span class="bo-label">Distance</span>
+          <input type="range" id="innerShadowDistance" min="0" max="100" value="5">
+          <input type="number" class="bo-val" id="innerShadowDistanceVal" min="0" max="30000" value="5">
+        </div>
+        <div class="bo-row">
+          <span class="bo-label">Choke</span>
+          <input type="range" id="innerShadowChoke" min="0" max="100" value="0">
+          <input type="number" class="bo-val" id="innerShadowChokeVal" min="0" max="100" value="0">
+        </div>
+        <div class="bo-row">
+          <span class="bo-label">Size</span>
+          <input type="range" id="innerShadowSize" min="0" max="250" value="5">
+          <input type="number" class="bo-val" id="innerShadowSizeVal" min="0" max="1000" value="5">
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== INNER GLOW ===================== -->
+    <div class="bo-section" data-fx="innerGlow">
+      <div class="bo-section-header">
+        <span class="bo-fx-label"><input type="checkbox" class="bo-enable" data-fx="innerGlow"><span class="bo-fx-name">Inner Glow</span></span>
+        <div class="color-swatch" id="innerGlowColor" title="Inner Glow Color"></div>
+        <span class="bo-collapse-arrow">▾</span>
+      </div>
+      <div class="bo-section-body">
+        <div class="bo-row">
+          <span class="bo-label">Blend</span>
+          <select id="innerGlowBlendMode" class="bo-select bo-select-blend"></select>
+        </div>
+        <div class="bo-row">
+          <span class="bo-label">Opacity</span>
+          <input type="range" id="innerGlowOpacity" min="0" max="100" value="75">
+          <input type="number" class="bo-val" id="innerGlowOpacityVal" min="0" max="100" value="75">
+        </div>
+        <div class="bo-row">
+          <span class="bo-label">Technique</span>
+          <select id="innerGlowTechnique" class="bo-select">
+            <option value="softMatte">Softer</option>
+            <option value="preciseMatte">Precise</option>
+          </select>
+        </div>
+        <div class="bo-row">
+          <span class="bo-label">Choke</span>
+          <input type="range" id="innerGlowChoke" min="0" max="100" value="0">
+          <input type="number" class="bo-val" id="innerGlowChokeVal" min="0" max="100" value="0">
+        </div>
+        <div class="bo-row">
+          <span class="bo-label">Size</span>
+          <input type="range" id="innerGlowSize" min="0" max="250" value="10">
+          <input type="number" class="bo-val" id="innerGlowSizeVal" min="0" max="1000" value="10">
+        </div>
+        <div class="bo-row">
+          <span class="bo-label">Range</span>
+          <input type="range" id="innerGlowRange" min="1" max="100" value="50">
+          <input type="number" class="bo-val" id="innerGlowRangeVal" min="1" max="100" value="50">
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== SATIN ===================== -->
+    <div class="bo-section" data-fx="satin">
+      <div class="bo-section-header">
+        <span class="bo-fx-label"><input type="checkbox" class="bo-enable" data-fx="satin"><span class="bo-fx-name">Satin</span></span>
+        <div class="color-swatch" id="satinColor" title="Satin Color"></div>
+        <span class="bo-collapse-arrow">▾</span>
+      </div>
+      <div class="bo-section-body">
+        <div class="bo-row">
+          <span class="bo-label">Blend</span>
+          <select id="satinBlendMode" class="bo-select bo-select-blend"></select>
+        </div>
+        <div class="bo-row">
+          <span class="bo-label">Opacity</span>
+          <input type="range" id="satinOpacity" min="0" max="100" value="50">
+          <input type="number" class="bo-val" id="satinOpacityVal" min="0" max="100" value="50">
+        </div>
+        <div class="bo-angle-row">
+          <canvas id="satinAngleCanvas" width="20" height="20"></canvas>
+          <span class="bo-angle-label">Angle</span>
+          <input type="number" id="satinAngleInput" min="-180" max="180" value="19">
+        </div>
+        <div class="bo-row">
+          <span class="bo-label">Distance</span>
+          <input type="range" id="satinDistance" min="0" max="100" value="11">
+          <input type="number" class="bo-val" id="satinDistanceVal" min="0" max="30000" value="11">
+        </div>
+        <div class="bo-row">
+          <span class="bo-label">Size</span>
+          <input type="range" id="satinSize" min="0" max="250" value="14">
+          <input type="number" class="bo-val" id="satinSizeVal" min="0" max="1000" value="14">
+        </div>
+        <label class="bo-inline-check bo-block-check"><input type="checkbox" id="satinInvert" checked> Invert</label>
+      </div>
+    </div>
+
+    <!-- ===================== GRADIENT OVERLAY ===================== -->
+    <div class="bo-section" data-fx="gradientOverlay">
+      <div class="bo-section-header">
+        <span class="bo-fx-label"><input type="checkbox" class="bo-enable" data-fx="gradientOverlay"><span class="bo-fx-name">Gradient Overlay</span></span>
+        <span class="bo-collapse-arrow">▾</span>
+      </div>
+      <div class="bo-section-body">
+        <div class="bo-row">
+          <span class="bo-label">Blend</span>
+          <select id="gradientOverlayBlendMode" class="bo-select bo-select-blend"></select>
+        </div>
+        <div class="bo-row">
+          <span class="bo-label">Opacity</span>
+          <input type="range" id="gradientOverlayOpacity" min="0" max="100" value="100">
+          <input type="number" class="bo-val" id="gradientOverlayOpacityVal" min="0" max="100" value="100">
+        </div>
+        <div class="bo-gradient-editor" id="gradientOverlayEditor"></div>
+        <div class="bo-row">
+          <span class="bo-label">Style</span>
+          <select id="gradientOverlayStyle" class="bo-select">
+            <option value="linear">Linear</option>
+            <option value="radial">Radial</option>
+            <option value="angle">Angle</option>
+            <option value="reflected">Reflected</option>
+            <option value="diamond">Diamond</option>
+          </select>
+        </div>
+        <div class="bo-angle-row">
+          <canvas id="gradientOverlayAngleCanvas" width="20" height="20"></canvas>
+          <span class="bo-angle-label">Angle</span>
+          <input type="number" id="gradientOverlayAngleInput" min="-180" max="180" value="90">
+        </div>
+        <div class="bo-row">
+          <span class="bo-label">Scale</span>
+          <input type="range" id="gradientOverlayScale" min="10" max="150" value="100">
+          <input type="number" class="bo-val" id="gradientOverlayScaleVal" min="1" max="1000" value="100">
+        </div>
+        <label class="bo-inline-check bo-block-check"><input type="checkbox" id="gradientOverlayReverse"> Reverse</label>
+      </div>
+    </div>
+
+    <!-- ===================== OUTER GLOW ===================== -->
+    <div class="bo-section" data-fx="outerGlow">
+      <div class="bo-section-header">
+        <span class="bo-fx-label"><input type="checkbox" class="bo-enable" data-fx="outerGlow"><span class="bo-fx-name">Outer Glow</span></span>
+        <div class="color-swatch" id="outerGlowColor" title="Outer Glow Color"></div>
+        <span class="bo-collapse-arrow">▾</span>
+      </div>
+      <div class="bo-section-body">
+        <div class="bo-row">
+          <span class="bo-label">Blend</span>
+          <select id="outerGlowBlendMode" class="bo-select bo-select-blend"></select>
+        </div>
+        <div class="bo-row">
+          <span class="bo-label">Opacity</span>
+          <input type="range" id="outerGlowOpacity" min="0" max="100" value="75">
+          <input type="number" class="bo-val" id="outerGlowOpacityVal" min="0" max="100" value="75">
+        </div>
+        <div class="bo-row">
+          <span class="bo-label">Technique</span>
+          <select id="outerGlowTechnique" class="bo-select">
+            <option value="softMatte">Softer</option>
+            <option value="preciseMatte">Precise</option>
+          </select>
+        </div>
+        <div class="bo-row">
+          <span class="bo-label">Spread</span>
+          <input type="range" id="outerGlowChoke" min="0" max="100" value="0">
+          <input type="number" class="bo-val" id="outerGlowChokeVal" min="0" max="100" value="0">
+        </div>
+        <div class="bo-row">
+          <span class="bo-label">Size</span>
+          <input type="range" id="outerGlowSize" min="0" max="250" value="20">
+          <input type="number" class="bo-val" id="outerGlowSizeVal" min="0" max="1000" value="20">
+        </div>
+        <div class="bo-row">
+          <span class="bo-label">Range</span>
+          <input type="range" id="outerGlowRange" min="1" max="100" value="50">
+          <input type="number" class="bo-val" id="outerGlowRangeVal" min="1" max="100" value="50">
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== DROP SHADOW ===================== -->
+    <div class="bo-section" data-fx="dropShadow">
+      <div class="bo-section-header">
+        <span class="bo-fx-label"><input type="checkbox" class="bo-enable" data-fx="dropShadow"><span class="bo-fx-name">Drop Shadow</span></span>
+        <div class="color-swatch" id="dropShadowColor" title="Drop Shadow Color"></div>
+        <span class="bo-collapse-arrow">▾</span>
+      </div>
+      <div class="bo-section-body">
+        <div class="bo-row">
+          <span class="bo-label">Blend</span>
+          <select id="dropShadowBlendMode" class="bo-select bo-select-blend"></select>
+        </div>
+        <div class="bo-row">
+          <span class="bo-label">Opacity</span>
+          <input type="range" id="dropShadowOpacity" min="0" max="100" value="75">
+          <input type="number" class="bo-val" id="dropShadowOpacityVal" min="0" max="100" value="75">
+        </div>
+        <div class="bo-angle-row">
+          <canvas id="dropShadowAngleCanvas" width="20" height="20"></canvas>
+          <span class="bo-angle-label">Angle</span>
+          <input type="number" id="dropShadowAngleInput" min="-180" max="180" value="120">
+          <label class="bo-inline-check"><input type="checkbox" id="dropShadowUseGlobalLight" checked> Global</label>
+        </div>
+        <div class="bo-row">
+          <span class="bo-label">Distance</span>
+          <input type="range" id="dropShadowDistance" min="0" max="100" value="5">
+          <input type="number" class="bo-val" id="dropShadowDistanceVal" min="0" max="30000" value="5">
+        </div>
+        <div class="bo-row">
+          <span class="bo-label">Choke</span>
+          <input type="range" id="dropShadowChoke" min="0" max="100" value="0">
+          <input type="number" class="bo-val" id="dropShadowChokeVal" min="0" max="100" value="0">
+        </div>
+        <div class="bo-row">
+          <span class="bo-label">Size</span>
+          <input type="range" id="dropShadowSize" min="0" max="250" value="5">
+          <input type="number" class="bo-val" id="dropShadowSizeVal" min="0" max="1000" value="5">
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /bo-scroll -->
+
+  <div class="bo-footer">
+    <span class="bo-footer-credit">TypoBlend by Maditor</span>
+    <div class="bo-settings-row"><a href="#" id="btnSettings" class="bo-settings-link">Settings</a></div>
+  </div>
+</div>
+
+<div id="settingsPopup" class="bo-settings-popup" style="display:none;">
+  <div class="bo-settings-title">Show / Hide Tools</div>
+  <div id="settingsList" class="bo-settings-list"></div>
+</div>
+
+<div id="colorPickerPopup" style="display:none;">
+  <div class="color-presets">
+    <div class="recent-colors"></div>
+    <div class="color-grid" id="colorGrid"></div>
+  </div>
+</div>
+
+<script src="../lib/CSInterface.js"></script>
+<script src="scripts.js"></script>
+</body>
+</html>
