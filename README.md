@@ -32,9 +32,40 @@ TypoBlend/
 
 ## 2. Cài đặt
 
+Bộ anh tải về có cấu trúc:
+```
+(thư mục giải nén ra)/
+├── install_win.bat     ← chạy file này (chỉ Windows)
+└── TypoBlend/           ← toàn bộ extension, xem cấu trúc bên dưới
+```
+
+### Cách nhanh (Windows) — dùng `install_win.bat`
+
+1. Copy file `CSInterface.js` từ bộ TypoCore anh gửi (`lib/CSInterface.js`)
+   vào đúng `TypoBlend/lib/CSInterface.js` trước (ngang hàng với `CSXS` và
+   `client` bên trong thư mục `TypoBlend`) — file này Adobe cung cấp sẵn,
+   TypoCore của anh đã có rồi nên chỉ cần copy qua. Không có file này panel
+   sẽ không chạy được, nhưng thiếu cũng không sao, cài xong bổ sung sau
+   cũng được.
+2. Double-click file **`install_win.bat`** (file này phải nằm **ngang
+   hàng** với thư mục `TypoBlend`, đừng tách rời 2 cái ra).
+3. Script tự làm hết:
+   - Bật `PlayerDebugMode` cho các bản CSXS 6–12 (không cần biết chính xác
+     Photoshop đang dùng bản CEP nào).
+   - Copy toàn bộ thư mục `TypoBlend` vào
+     `%APPDATA%\Adobe\CEP\extensions\TypoBlend` (thư mục riêng của user,
+     **không cần quyền Administrator**, không hiện UAC gì cả).
+   - Nếu có bản cài cũ thì tự gỡ trước rồi cài lại bản mới.
+4. Mở (hoặc khởi động lại) Photoshop → `Window > Extensions (Legacy)`
+   (hoặc `Plugins`) → **TypoBlend**.
+
+Muốn cài lại/cập nhật thì chạy lại file này lần nữa là được.
+
+### Cách thủ công (Windows / macOS)
+
 1. Copy nguyên thư mục `TypoBlend` vào:
-   - Windows: `C:\Program Files (x86)\Common Files\Adobe\CEP\extensions\`
-   - macOS: `/Library/Application Support/Adobe/CEP/extensions/`
+   - Windows: `%APPDATA%\Adobe\CEP\extensions\`
+   - macOS: `~/Library/Application Support/Adobe/CEP/extensions/`
 2. Copy file `CSInterface.js` từ bộ TypoCore anh gửi (`../lib/CSInterface.js`)
    vào đúng `TypoBlend/lib/CSInterface.js` — file này Adobe cung
    cấp sẵn, TypoCore của anh đã có rồi nên chỉ cần copy qua.
@@ -132,6 +163,11 @@ copy từ TypoCore của anh qua là được.
 **Triệu chứng: bấm Clear không xoá được fx.** Đã sửa ở bản hiện tại — Clear
 giờ xoá hẳn property `layerEffects` trước, sau đó còn set tường minh
 `enabled:false` cho từng effect (đi cùng cơ chế với Apply) để chắc chắn ăn.
+
+**Triệu chứng: chạy `install_win.bat` báo lỗi "Khong tim thay thu muc
+TypoBlend".** File `install_win.bat` phải nằm **ngang hàng** (cùng cấp) với
+thư mục `TypoBlend`, không được để nó vào bên trong thư mục `TypoBlend` hay
+tách 2 thứ ra 2 chỗ khác nhau.
 
 **Cách xem lỗi chi tiết qua Chrome (khi vẫn còn lỗi khác):**
 1. Mở panel trong Photoshop như bình thường.
