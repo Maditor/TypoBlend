@@ -2,13 +2,27 @@
 //  TypoBlend – Panel logic
 // ============================================================
 var cs = null;
-try {
-    cs = new CSInterface();
-} catch (e) {
-    // Thường do thiếu file lib/CSInterface.js hoặc sai đường dẫn "../lib/CSInterface.js".
-    // Không throw ở đây nữa để phần còn lại của UI (dropdown, màu, nút bấm) vẫn dựng lên
-    // bình thường — chỉ riêng các thao tác cần giao tiếp với Photoshop sẽ báo lỗi rõ ràng.
-    cs = null;
+var csInitErrorReason = "";
+
+if (window.__csLoadFailed) {
+    // <script src="CSInterface.js"> bắn lỗi onerror -> file không tồn tại
+    // hoặc sai đường dẫn (404), trình duyệt còn chưa kịp chạy được dòng nào bên trong.
+    var _csScriptTag = document.querySelector('script[src*="CSInterface"]');
+    var _csResolvedUrl = _csScriptTag ? _csScriptTag.src : "CSInterface.js";
+    csInitErrorReason = "Không tìm thấy CSInterface.js (404). Đường dẫn panel đang cố load: " + _csResolvedUrl;
+} else if (typeof CSInterface === "undefined") {
+    // File load được (không 404) nhưng nội dung không định nghĩa ra class CSInterface
+    // -> khả năng file bị rỗng/hỏng/sai nội dung (không đúng file gốc của Adobe).
+    csInitErrorReason = "File CSInterface.js đã load nhưng không hợp lệ (không định nghĩa CSInterface) — kiểm tra lại đúng nội dung file gốc.";
+} else {
+    try {
+        cs = new CSInterface();
+    } catch (e) {
+        // Không throw ở đây nữa để phần còn lại của UI (dropdown, màu, nút bấm) vẫn dựng lên
+        // bình thường — chỉ riêng các thao tác cần giao tiếp với Photoshop sẽ báo lỗi rõ ràng.
+        cs = null;
+        csInitErrorReason = "Lỗi khi khởi tạo CSInterface: " + (e && e.message ? e.message : e);
+    }
 }
 
 function $(id) { return document.getElementById(id); }
@@ -815,7 +829,7 @@ function applyDataToUI(data) {
 // ============================================================
 function showLibError(msg) {
     var name = $("boLayerName");
-    if (name) { name.textContent = "⚠ " + msg; name.style.color = "#ff6b6b"; }
+    if (name) { name.textContent = "⚠ " + msg; name.style.color = "#ff6b6b"; name.classList.add("bo-error"); }
     ["btnSync", "btnApply", "btnClear", "btnCopyStyle", "btnPasteStyle"].forEach(function (id) {
         var b = $(id); if (b) b.disabled = true;
     });
@@ -823,9 +837,9 @@ function showLibError(msg) {
 }
 
 // Mọi hàm gọi sang Photoshop đều đi qua đây trước — nếu cs null (do thiếu
-// lib/CSInterface.js) thì báo lỗi rõ ràng thay vì im lặng không làm gì.
+// client/CSInterface.js) thì báo lỗi rõ ràng thay vì im lặng không làm gì.
 function csReady() {
-    if (!cs) { showLibError("Could not connect to Photoshop — missing lib/CSInterface.js (see README)."); return false; }
+    if (!cs) { showLibError(csInitErrorReason || "Could not connect to Photoshop — missing client/CSInterface.js (see README)."); return false; }
     return true;
 }
 
@@ -1133,7 +1147,7 @@ function scheduleAutoApply() {
         });
         performSync({ silent: true });
     } else {
-        showLibError("Could not connect to Photoshop — missing lib/CSInterface.js (see README).");
+        showLibError(csInitErrorReason || "Could not connect to Photoshop — missing client/CSInterface.js (see README).");
     }
   } catch (e) {
     console.error("TypoBlend init error:", e);

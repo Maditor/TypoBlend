@@ -95,6 +95,7 @@ body {
     text-overflow: ellipsis;
     flex-shrink: 0;
 }
+.bo-layername.bo-error { white-space: normal; word-break: break-all; line-height: 1.4; }
 
 /* ===================== SCROLL AREA ===================== */
 .bo-scroll {

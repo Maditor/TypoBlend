@@ -17,7 +17,7 @@ REM ---- 1. Kiem tra dang dung dung thu muc khong ----
 if not exist "%SRC_DIR%\CSXS\manifest.xml" (
     echo [LOI] Khong tim thay CSXS\manifest.xml cung cap voi file nay.
     echo Hay chac chan install_win.bat dang nam NGAY TRONG thu muc TypoBlend
-    echo ^(cung cap voi CSXS, client, lib^) roi chay lai.
+    echo ^(cung cap voi CSXS, client^) roi chay lai.
     echo.
     pause
     exit /b 1
@@ -30,12 +30,11 @@ for %%V in (6 7 8 9 10 11 12) do (
 )
 echo       -^> Da bat PlayerDebugMode cho CSXS.6 den CSXS.12
 
-REM ---- 3. Canh bao neu chua co lib\CSInterface.js (file nay phai tu copy tay) ----
+REM ---- 3. Kiem tra file client\CSInterface.js (da co san trong bo, chi de phong) ----
 echo.
-if not exist "%SRC_DIR%\lib\CSInterface.js" (
-    echo [CANH BAO] Chua co file "lib\CSInterface.js".
-    echo Panel se khong chay duoc neu thieu file nay - nho copy tu TypoCore qua
-    echo roi chay lai file nay ^(hoac copy tay sau cung duoc^).
+if not exist "%SRC_DIR%\client\CSInterface.js" (
+    echo [CANH BAO] Chua co file "client\CSInterface.js".
+    echo Panel se khong chay duoc neu thieu file nay.
     echo.
 )
 
