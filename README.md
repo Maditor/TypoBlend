@@ -24,59 +24,55 @@ TypoBlend/
 │   ├── index.html                ← giao diện panel
 │   ├── style.css
 │   ├── scripts.js                ← logic UI, Sync/Apply, hàng chờ lệnh, gradient editor nhiều màu
-│   └── host.jsx                  ← ExtendScript build/đọc ActionDescriptor
-├── lib/                           ← (anh cần tự thêm, xem bước 2)
-│   └── CSInterface.js
+│   ├── host.jsx                  ← ExtendScript build/đọc ActionDescriptor
+│   └── CSInterface.js            ← thư viện cầu nối JS ↔ Photoshop, Adobe cung cấp sẵn, đã có trong bộ này rồi
+├── install_win.bat                ← script cài đặt tự động (Windows), xem mục 2
 └── README.md
 ```
 
 ## 2. Cài đặt
 
-Bộ anh tải về có cấu trúc:
-```
-(thư mục giải nén ra)/
-├── install_win.bat     ← chạy file này (chỉ Windows)
-└── TypoBlend/           ← toàn bộ extension, xem cấu trúc bên dưới
-```
+File `CSInterface.js` (thư viện cầu nối do Adobe cung cấp) đã có sẵn trong
+bộ này rồi (`client/CSInterface.js`), **không cần tự thêm gì nữa** — khác
+với các bản trước đó.
 
 ### Cách nhanh (Windows) — dùng `install_win.bat`
 
-1. Copy file `CSInterface.js` từ bộ TypoCore anh gửi (`lib/CSInterface.js`)
-   vào đúng `TypoBlend/lib/CSInterface.js` trước (ngang hàng với `CSXS` và
-   `client` bên trong thư mục `TypoBlend`) — file này Adobe cung cấp sẵn,
-   TypoCore của anh đã có rồi nên chỉ cần copy qua. Không có file này panel
-   sẽ không chạy được, nhưng thiếu cũng không sao, cài xong bổ sung sau
-   cũng được.
-2. Double-click file **`install_win.bat`** (file này phải nằm **ngang
-   hàng** với thư mục `TypoBlend`, đừng tách rời 2 cái ra).
-3. Script tự làm hết:
+1. Double-click file **`install_win.bat`** — file này nằm **ngay trong**
+   thư mục `TypoBlend`, cùng cấp với `CSXS`, `client`, đừng tách nó ra chỗ
+   khác.
+2. Script tự làm hết:
    - Bật `PlayerDebugMode` cho các bản CSXS 6–12 (không cần biết chính xác
      Photoshop đang dùng bản CEP nào).
    - Copy toàn bộ thư mục `TypoBlend` vào
      `%APPDATA%\Adobe\CEP\extensions\TypoBlend` (thư mục riêng của user,
      **không cần quyền Administrator**, không hiện UAC gì cả).
    - Nếu có bản cài cũ thì tự gỡ trước rồi cài lại bản mới.
-4. Mở (hoặc khởi động lại) Photoshop → `Window > Extensions (Legacy)`
+3. Mở (hoặc khởi động lại) Photoshop → `Window > Extensions (Legacy)`
    (hoặc `Plugins`) → **TypoBlend**.
 
 Muốn cài lại/cập nhật thì chạy lại file này lần nữa là được.
+
+**Lưu ý nếu trước đây anh từng cài các bản cũ hơn**: kiểm tra không còn thư
+mục `TypoBlend` sót lại ở chỗ khác (ví dụ
+`C:\Program Files (x86)\Common Files\Adobe\CEP\extensions\TypoBlend` từ
+cách cài thủ công/dùng quyền Admin hồi trước) — có 2 bản cài trùng ID dễ làm
+Photoshop đọc nhầm bản cũ thiếu file. Xoá hết bản cũ, chỉ giữ đúng 1 bản
+trong `%APPDATA%`.
 
 ### Cách thủ công (Windows / macOS)
 
 1. Copy nguyên thư mục `TypoBlend` vào:
    - Windows: `%APPDATA%\Adobe\CEP\extensions\`
    - macOS: `~/Library/Application Support/Adobe/CEP/extensions/`
-2. Copy file `CSInterface.js` từ bộ TypoCore anh gửi (`../lib/CSInterface.js`)
-   vào đúng `TypoBlend/lib/CSInterface.js` — file này Adobe cung
-   cấp sẵn, TypoCore của anh đã có rồi nên chỉ cần copy qua.
-3. Bật chế độ debug để Photoshop chấp nhận extension chưa ký:
+2. Bật chế độ debug để Photoshop chấp nhận extension chưa ký:
    - Windows: thêm registry `HKEY_CURRENT_USER\Software\Adobe\CSXS.9`
      (hoặc `.10`/`.11` tuỳ bản CEP của Photoshop anh đang dùng) → key
      `PlayerDebugMode` = `1` (String).
    - macOS: Terminal chạy
      `defaults write com.adobe.CSXS.9 PlayerDebugMode 1`
      (đổi `9` thành version CSXS đúng với Photoshop của anh nếu khác).
-4. Mở Photoshop → `Window > Extensions (Legacy)` (hoặc `Plugins`) →
+3. Mở Photoshop → `Window > Extensions (Legacy)` (hoặc `Plugins`) →
    **TypoBlend**. Icon 2 chữ T sẽ hiện trong danh sách/menu Extensions.
 
 Panel co giãn được từ **200px đến 500px** ngang (chỉnh trong `manifest.xml`
@@ -150,31 +146,34 @@ Nếu sau này anh cần thêm phần nào ở trên, cứ nói em làm tiếp n
 ## 7. Xử lý lỗi thường gặp
 
 **Triệu chứng: dropdown Blend Mode trống, ô màu không lên màu, Sync/Apply bấm
-không có phản ứng gì (không nhận layer đang chọn).**
+không có phản ứng gì, panel báo "Could not connect to Photoshop...".**
 
-Đây là lỗi thiếu file `lib/CSInterface.js` — panel không kết nối được vào
-Photoshop nên toàn bộ giao diện dựng lên "trơ", không có gì hoạt động. Panel
-sẽ tự phát hiện và hiện chữ đỏ cảnh báo ngay trên panel
-(`⚠ Could not connect to Photoshop...`) thay vì im lặng. Cách sửa: kiểm tra
-lại đúng file `CSInterface.js` đã nằm ở `TypoBlend/lib/CSInterface.js`
-(ngang hàng với `CSXS` và `client`, **không** để trong `client`) chưa —
-copy từ TypoCore của anh qua là được.
+Đây là lỗi thiếu/sai file `client/CSInterface.js` — panel không kết nối
+được vào Photoshop nên toàn bộ giao diện dựng lên "trơ", không có gì hoạt
+động. File này đã bundle sẵn trong bộ nên bình thường không cần đụng vào,
+nhưng nếu vẫn gặp lỗi thì panel sẽ tự hiện **chữ đỏ ngay trên panel nói rõ
+nguyên nhân**, gồm 3 trường hợp:
+- *"Không tìm thấy CSInterface.js (404)..."* kèm theo đúng đường dẫn
+  tuyệt đối mà panel đã cố load — copy đường dẫn đó ra kiểm tra bằng File
+  Explorer xem file có thật sự nằm đó không (phải nằm ngay trong thư mục
+  `client`, cùng cấp `index.html`).
+- *"...đã load nhưng không hợp lệ..."* — file có tồn tại nhưng nội dung sai/
+  rỗng/hỏng.
+- *"Lỗi khi khởi tạo CSInterface: ..."* — hiếm gặp hơn, kèm theo nguyên văn
+  lỗi JavaScript, chụp lại gửi em.
+
+Nếu gặp lỗi 404 dù file rõ ràng đã nằm đúng chỗ: khả năng cao đang có **2
+bản cài trùng nhau** (ví dụ 1 bản cũ còn sót ở `Program Files (x86)` từ
+cách cài thủ công/Admin hồi trước, cộng bản mới trong `%APPDATA%`) khiến
+Photoshop đọc nhầm bản cũ chưa có sửa mới nhất — xoá hết bản thừa, chỉ giữ
+lại đúng 1 bản, rồi tắt hẳn Photoshop (kiểm tra Task Manager không còn tiến
+trình nào) mở lại.
 
 **Triệu chứng: bấm Clear không xoá được fx.** Đã sửa ở bản hiện tại — Clear
 giờ xoá hẳn property `layerEffects` trước, sau đó còn set tường minh
 `enabled:false` cho từng effect (đi cùng cơ chế với Apply) để chắc chắn ăn.
 
-**Triệu chứng: chạy `install_win.bat` báo lỗi "Khong tim thay thu muc
-TypoBlend".** File `install_win.bat` phải nằm **ngang hàng** (cùng cấp) với
-thư mục `TypoBlend`, không được để nó vào bên trong thư mục `TypoBlend` hay
-tách 2 thứ ra 2 chỗ khác nhau.
-
-**Cách xem lỗi chi tiết qua Chrome (khi vẫn còn lỗi khác):**
-1. Mở panel trong Photoshop như bình thường.
-2. Mở trình duyệt Chrome, gõ địa chỉ `http://localhost:8088`.
-3. Chrome sẽ liệt kê panel đang chạy → bấm vào để mở DevTools y hệt web
-   thường, tab Console sẽ hiện đúng dòng lỗi (đỏ) kèm số dòng trong
-   `scripts.js`/`index.html`. Chụp màn hình gửi em là em đọc được ngay.
-
-(Nếu `localhost:8088` không hiện gì, đóng Photoshop rồi mở lại — cổng debug
-chỉ có tác dụng sau khi Photoshop load lại extension.)
+**Triệu chứng: chạy `install_win.bat` báo lỗi "Khong tim thay CSXS\\
+manifest.xml".** File `install_win.bat` phải nằm **ngay trong** thư mục
+`TypoBlend` (cùng cấp `CSXS`, `client`), không được tách ra ngoài hay để
+nhầm vào thư mục con.
