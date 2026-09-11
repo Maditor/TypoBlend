@@ -298,27 +298,6 @@ input[type="checkbox"]:checked::after {
 }
 .bo-gradient-remove:hover { background: #5a2a2a; }
 
-/* ===================== COLOR PICKER POPUP ===================== */
-#colorPickerPopup {
-    display: none;
-    position: fixed;
-    z-index: 100000;
-    flex-direction: column;
-    background: #383838;
-    border: 1px solid #555;
-    border-radius: 4px;
-    padding: 6px 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.6);
-    min-width: 120px;
-    max-width: 120px;
-}
-.color-presets { display: flex; flex-direction: column; gap: 6px; }
-.recent-colors { display: flex; flex-wrap: nowrap; gap: 0; }
-.recent-colors .swatch { width: 16px; height: 16px; outline: 1px solid #444; outline-offset: -1px; border-radius: 1px; flex-shrink: 0; }
-.color-grid { display: grid; grid-template-columns: repeat(7, 14px); gap: 1px; margin-top: 4px; }
-.color-grid > div { width: 14px; height: 14px; outline: 1px solid #444; outline-offset: -1px; transition: transform 0.05s; }
-.color-grid > div:hover { transform: scale(1.15); z-index: 1; }
-
 /* ===================== FOOTER ===================== */
 .bo-footer {
     flex-shrink: 0;

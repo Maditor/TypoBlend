@@ -144,97 +144,6 @@ function getSwatchColor(el) {
     try { return JSON.parse(d); } catch (e) { return null; }
 }
 
-var recentColorsBO = (function () { try { return JSON.parse(localStorage.getItem("boRecentColors") || "[]"); } catch (e) { return []; } })();
-function addRecentColorBO(c) {
-    recentColorsBO = recentColorsBO.filter(function (i) { return i.r !== c.r || i.g !== c.g || i.b !== c.b; });
-    recentColorsBO.unshift(c);
-    if (recentColorsBO.length > 8) recentColorsBO.pop();
-    try { localStorage.setItem("boRecentColors", JSON.stringify(recentColorsBO)); } catch (e) {}
-}
-
-function hslToRgb(h, s, l) {
-    h /= 360;
-    function f(n) {
-        var k = (n + h * 12) % 12;
-        var a = s * Math.min(l, 1 - l);
-        return l - a * Math.max(-1, Math.min(k - 3, Math.min(9 - k, 1)));
-    }
-    return { r: Math.round(f(0) * 255), g: Math.round(f(8) * 255), b: Math.round(f(4) * 255) };
-}
-
-function buildColorGrid() {
-    var grid = $("colorGrid");
-    if (!grid) return;
-    grid.innerHTML = "";
-    var colors = [];
-    for (var i = 0; i < 7; i++) { var v = Math.round(255 * i / 6); colors.push({ r: v, g: v, b: v }); }
-    var hues = [0, 20, 40, 60, 90, 120, 150, 180, 200, 220, 250, 280, 310, 330];
-    hues.forEach(function (h) {
-        [0.85, 0.65, 0.45, 0.3].forEach(function (l) { colors.push(hslToRgb(h, 0.75, l)); });
-    });
-    colors.forEach(function (c) {
-        var d = document.createElement("div");
-        d.style.backgroundColor = "rgb(" + c.r + "," + c.g + "," + c.b + ")";
-        d.addEventListener("click", function (ev) {
-            ev.stopPropagation();
-            var popup = $("colorPickerPopup");
-            var swEl = popup ? popup._target : null;
-            if (swEl) { setSwatchColor(swEl, c); if (swEl._onColor) swEl._onColor(c); addRecentColorBO(c); }
-            if (popup) popup.style.display = "none";
-            scheduleAutoApply();
-        });
-        grid.appendChild(d);
-    });
-}
-
-var globalColorListenerAdded = false;
-function openColorPicker(swEl, e) {
-    var popup = $("colorPickerPopup");
-    if (!popup) return;
-    if (popup.parentNode !== document.body) document.body.appendChild(popup);
-    popup._target = swEl;
-
-    var recentDiv = popup.querySelector(".recent-colors");
-    recentDiv.innerHTML = "";
-    recentColorsBO.forEach(function (c) {
-        var s = document.createElement("div"); s.className = "swatch";
-        s.style.backgroundColor = "rgb(" + c.r + "," + c.g + "," + c.b + ")";
-        s.addEventListener("click", function (ev) {
-            ev.stopPropagation();
-            setSwatchColor(swEl, c); if (swEl._onColor) swEl._onColor(c);
-            addRecentColorBO(c); popup.style.display = "none";
-            scheduleAutoApply();
-        });
-        recentDiv.appendChild(s);
-    });
-
-    // Canh theo vị trí Ô MÀU (không theo con trỏ) và luôn chừa khoảng cách —
-    // để nhấp nhanh lần 2 (double-click mở bảng màu gốc Photoshop) không bao
-    // giờ bị chính popup này che mất ô màu.
-    var rect = swEl.getBoundingClientRect();
-    var gap = 6, popupW = 124, popupH = 170;
-    var left = rect.left;
-    var top = rect.bottom + gap;
-    if (top + popupH > window.innerHeight - 5) top = rect.top - popupH - gap; // hết chỗ dưới -> đặt lên trên
-    if (left + popupW > window.innerWidth - 5) left = window.innerWidth - popupW - 5;
-    if (left < 5) left = 5;
-    if (top < 5) top = 5;
-    popup.style.position = "fixed";
-    popup.style.top = top + "px"; popup.style.left = left + "px";
-    popup.style.display = "flex";
-
-    if (!globalColorListenerAdded) {
-        document.addEventListener("click", function (ev) {
-            var p = $("colorPickerPopup");
-            if (p && p.style.display === "flex") {
-                if (p.contains(ev.target) || ev.target.closest(".color-swatch")) return;
-                p.style.display = "none";
-            }
-        });
-        globalColorListenerAdded = true;
-    }
-}
-
 // ============================================================
 //  GRADIENT EDITOR (nhiều màu – khác TypoCore gốc chỉ có 2 màu)
 // ============================================================
@@ -1098,14 +1007,6 @@ function scheduleAutoApply() {
         var sw = e.target.closest(".color-swatch");
         if (!sw) return;
         e.stopPropagation();
-        openColorPicker(sw, e);
-    });
-    document.addEventListener("dblclick", function (e) {
-        var sw = e.target.closest(".color-swatch");
-        if (!sw) return;
-        e.stopPropagation();
-        var popup = $("colorPickerPopup");
-        if (popup) popup.style.display = "none";
         if (!cs) return;
         var cur = getSwatchColor(sw) || { r: 0, g: 0, b: 0 };
         runExclusive(function (done) {
@@ -1138,8 +1039,6 @@ function scheduleAutoApply() {
         if (e.target.id === "chkAutoApply" || e.target.id === "chkAutoSync") return;
         scheduleAutoApply();
     }, true);
-
-    buildColorGrid();
 
     if (cs) {
         runExclusive(function (done) {
